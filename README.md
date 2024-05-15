@@ -1,1 +1,1 @@
-https://github.com/Ilya193/Uvenco/assets/40058340/281d6292-d057-41de-a78b-89d3c42bff1a
+https://github.com/Ilya193/Uvenco/assets/40058340/64eb6396-2e34-422c-8dd8-75df412488c6
