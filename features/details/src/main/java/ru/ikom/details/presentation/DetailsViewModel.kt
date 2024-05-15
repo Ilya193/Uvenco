@@ -33,6 +33,7 @@ class DetailsViewModel(
             is Event.ChangeName -> changeName(event.name)
             is Event.ChangePrice -> changePrice(event.price)
             is Event.Save -> save(event.name, event.price)
+            is Event.SellForFree -> sellForFree(event.isFree)
         }
     }
 
@@ -52,6 +53,11 @@ class DetailsViewModel(
         }
     }
 
+    private fun sellForFree(isFree: Boolean) = viewModelScope.launch(dispatcher) {
+        if (isFree) changePrice(null)
+        else changePrice(startUiState.drink?.price)
+    }
+
 }
 
 data class DetailsUiState(
@@ -66,6 +72,9 @@ sealed interface Event {
 
     @JvmInline
     value class ChangePrice(val price: Int?) : Event
+
+    @JvmInline
+    value class SellForFree(val isFree: Boolean) : Event
 
     class Save(val name: String, val price: Int?) : Event
 }
