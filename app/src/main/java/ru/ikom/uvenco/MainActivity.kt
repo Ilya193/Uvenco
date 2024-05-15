@@ -6,6 +6,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideIn
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOut
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -99,8 +104,8 @@ fun Content(viewModel: MainViewModel = koinViewModel()) {
             modifier = Modifier,
             navController = navController,
             startDestination = Screens.CATALOG,
-            enterTransition = { EnterTransition.None },
-            exitTransition = { ExitTransition.None }
+            enterTransition = { slideInHorizontally(animationSpec = tween(500)) { it } },
+            exitTransition = { slideOutHorizontally(animationSpec = tween(500)) { it } }
         ) {
             composable(Screens.CATALOG) {
                 CatalogScreen { id, name, price ->

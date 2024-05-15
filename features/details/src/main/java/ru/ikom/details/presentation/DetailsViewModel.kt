@@ -37,14 +37,15 @@ class DetailsViewModel(
     }
 
     private fun changeName(name: String) = viewModelScope.launch(dispatcher) {
-        _uiState.update { it.copy(isChanges = name != startUiState.drink?.name && name.isNotEmpty()) }
+        _uiState.update { it.copy(isChanges = name != startUiState.drink?.name && name.isNotEmpty() && name.length <= MAX_LENGTH) }
     }
 
-    private fun changePrice(price: Int) = viewModelScope.launch(dispatcher) {
-        _uiState.update { it.copy(isChanges = price != startUiState.drink?.price && price != 0) }
+    private fun changePrice(price: Int?) = viewModelScope.launch(dispatcher) {
+        if (price == null) _uiState.update { it.copy(isChanges = price != startUiState.drink?.price) }
+        else _uiState.update { it.copy(isChanges = price != startUiState.drink?.price && price >= MIN_PRICE && price <= MAX_PRICE) }
     }
 
-    private fun save(name: String, price: Int) = viewModelScope.launch(dispatcher) {
+    private fun save(name: String, price: Int?) = viewModelScope.launch(dispatcher) {
         startUiState.drink?.let { drink ->
             repository.updateDrink(drink.copy(name = name, price = price).toDrinkDomain())
             _uiState.update { it.copy(isCompleted = Unit) }
@@ -60,7 +61,11 @@ data class DetailsUiState(
 )
 
 sealed interface Event {
-    data class ChangeName(val name: String) : Event
-    data class ChangePrice(val price: Int) : Event
-    data class Save(val name: String, val price: Int) : Event
+    @JvmInline
+    value class ChangeName(val name: String) : Event
+
+    @JvmInline
+    value class ChangePrice(val price: Int?) : Event
+
+    class Save(val name: String, val price: Int?) : Event
 }

@@ -69,12 +69,15 @@ fun DetailsScreen(
                     viewModel.action(Event.ChangeName(it))
                 },
                 onChangePrice = {
-                    inputPrice = it
-                    if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
-                    else viewModel.action(Event.ChangePrice(0))
+                    if (!it.contains(COMMA) && !it.contains(DOT)) {
+                        inputPrice = it
+                        if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
+                        else viewModel.action(Event.ChangePrice(null))
+                    }
                 },
                 onSave = { name, price ->
-                    viewModel.action(Event.Save(name, price.toInt()))
+                    if (price.isNotEmpty()) viewModel.action(Event.Save(name, price.toInt()))
+                    else viewModel.action(Event.Save(name, null))
                 },
             )
 
@@ -88,12 +91,15 @@ fun DetailsScreen(
                     viewModel.action(Event.ChangeName(it))
                 },
                 onChangePrice = {
-                    inputPrice = it
-                    if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
-                    else viewModel.action(Event.ChangePrice(0))
+                    if (!it.contains(COMMA) && !it.contains(DOT)) {
+                        inputPrice = it
+                        if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
+                        else viewModel.action(Event.ChangePrice(null))
+                    }
                 },
                 onSave = { name, price ->
-                    viewModel.action(Event.Save(name, price.toInt()))
+                    if (price.isNotEmpty()) viewModel.action(Event.Save(name, price.toInt()))
+                    else viewModel.action(Event.Save(name, null))
                 },
             )
     }
@@ -123,30 +129,11 @@ private fun PortraitOrientation(
         )
 
         Text(text = stringResource(R.string.name), color = LightGray)
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
-            value = drinkName, onValueChange = {
-                onChangeName(it)
-            }, colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = Main,
-                focusedContainerColor = Main,
-                focusedIndicatorColor = Color.Transparent,
-            )
-        )
+        SingleLineTextField(value = drinkName, onValueChange = onChangeName)
         Text(text = stringResource(R.string.price), color = LightGray)
-        TextField(
-            modifier = Modifier.fillMaxWidth(),
+        SingleLineTextField(
             value = drinkPrice,
-            onValueChange = {
-                onChangePrice(it)
-            },
-            colors = TextFieldDefaults.colors(
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = Main,
-                focusedContainerColor = Main,
-                focusedIndicatorColor = Color.Transparent,
-            ),
+            onValueChange = onChangePrice,
             trailingIcon = { Text(text = stringResource(ru.ikom.common.R.string.currency)) },
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
@@ -186,27 +173,11 @@ private fun LandscapeOrientation(
                 .fillMaxHeight()
         ) {
             Text(text = stringResource(R.string.name), color = LightGray)
-            TextField(
-                value = drinkName, onValueChange = {
-                    onChangeName(it)
-                }, colors = TextFieldDefaults.colors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Main,
-                    focusedContainerColor = Main,
-                    focusedIndicatorColor = Color.Transparent,
-                )
-            )
+            SingleLineTextField(value = drinkName, onValueChange = onChangeName)
             Text(text = stringResource(R.string.price), color = LightGray)
-            TextField(value = drinkPrice,
-                onValueChange = {
-                    onChangePrice(it)
-                },
-                colors = TextFieldDefaults.colors(
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Main,
-                    focusedContainerColor = Main,
-                    focusedIndicatorColor = Color.Transparent,
-                ),
+            SingleLineTextField(
+                value = drinkPrice,
+                onValueChange = onChangePrice,
                 trailingIcon = { Text(text = stringResource(ru.ikom.common.R.string.currency)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
@@ -241,4 +212,29 @@ private fun LandscapeOrientation(
             )
         }
     }
+}
+
+@Composable
+private fun SingleLineTextField(
+    value: String,
+    onValueChange: (String) -> Unit,
+    trailingIcon: @Composable (() -> Unit)? = null,
+    keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+    maxLength: Int = MAX_LENGTH
+) {
+    TextField(
+        value = value, onValueChange = {
+            if (it.length <= maxLength)
+                onValueChange(it)
+        }, colors = TextFieldDefaults.colors(
+            unfocusedIndicatorColor = Color.Transparent,
+            unfocusedContainerColor = Main,
+            focusedContainerColor = Main,
+            focusedIndicatorColor = Color.Transparent,
+        ),
+        singleLine = true,
+        maxLines = 1,
+        trailingIcon = trailingIcon,
+        keyboardOptions = keyboardOptions
+    )
 }
