@@ -110,6 +110,10 @@ fun DetailsScreen(
                     if (price.isNotEmpty()) viewModel.action(Event.Save(name, price.toInt()))
                     else viewModel.action(Event.Save(name, null))
                 },
+                onSwitch = {
+                    inputPrice = if (it) "" else drinkPrice ?: ""
+                    viewModel.action(Event.SellForFree(it))
+                }
             )
     }
 }
@@ -192,6 +196,7 @@ private fun LandscapeOrientation(
     onChangeName: (String) -> Unit,
     onChangePrice: (String) -> Unit,
     onSave: (String, String) -> Unit,
+    onSwitch: (Boolean) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -213,6 +218,27 @@ private fun LandscapeOrientation(
                 trailingIcon = { Text(text = stringResource(ru.ikom.common.R.string.currency)) },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
             )
+            Row(
+                modifier = Modifier
+                    .height(48.dp)
+                    .background(Main),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(text = stringResource(R.string.sell_for_free), color = Gray)
+                var checked by remember { mutableStateOf(drinkPrice.isEmpty()) }
+                Switch(
+                    checked = checked,
+                    onCheckedChange = {
+                        checked = it
+                        onSwitch(it)
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Orange,
+                    )
+                )
+            }
             Card(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
                 colors = CardDefaults.outlinedCardColors(containerColor = Orange),
@@ -255,7 +281,6 @@ private fun SingleLineTextField(
     maxLength: Int = MAX_LENGTH
 ) {
     TextField(
-        modifier = Modifier.fillMaxWidth(),
         value = value, onValueChange = {
             if (it.length <= maxLength)
                 onValueChange(it)
