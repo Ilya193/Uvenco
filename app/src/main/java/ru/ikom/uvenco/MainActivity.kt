@@ -4,12 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOut
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,7 +14,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,7 +22,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,17 +30,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalLifecycleOwner
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import ru.ikom.catalog.presentation.CatalogScreen
 import ru.ikom.common.theme.Gray
@@ -98,31 +96,26 @@ fun Content(viewModel: MainViewModel = koinViewModel()) {
             .background(Main)
     ) {
         TopContent(date = state.date, temperature = state.temperature) {
-            if (navBackStackEntry?.destination?.route == Screens.SETTINGS) navController.popBackStack()
+            val start = navController.graph.findStartDestination().route
+            val current = navBackStackEntry?.destination?.route
+            if (start != current) navController.popBackStack()
         }
         NavHost(
             modifier = Modifier,
             navController = navController,
-            startDestination = Screens.CATALOG,
+            startDestination = Catalog,
             enterTransition = { slideInHorizontally(animationSpec = tween(500)) { it } },
             exitTransition = { slideOutHorizontally(animationSpec = tween(500)) { it } }
         ) {
-            composable(Screens.CATALOG) {
+            composable<Catalog> {
                 CatalogScreen { id, name, price ->
-                    navController.navigate(
-                        Screens.SETTINGS
-                            .replace("{${Arguments.DRINK_ID}}", id.toString())
-                            .replace("{${Arguments.DRINK_NAME}}", name)
-                            .replace("{${Arguments.DRINK_PRICE}}", price.toString())
-                    )
+                    navController.navigate(Settings(id, name, price?.toString() ?: ""))
                 }
             }
 
-            composable(Screens.SETTINGS) {
-                val id = it.arguments?.getString(Arguments.DRINK_ID)?.toInt() ?: 0
-                val name = it.arguments?.getString(Arguments.DRINK_NAME) ?: ""
-                val price = it.arguments?.getString(Arguments.DRINK_PRICE)
-                DetailsScreen(id, name, if (price == "null") null else price) {
+            composable<Settings> {
+                val settings: Settings = it.toRoute()
+                DetailsScreen(settings.id, settings.name, settings.price) {
                     navController.popBackStack()
                 }
             }

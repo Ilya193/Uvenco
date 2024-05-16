@@ -48,7 +48,7 @@ import ru.ikom.details.R
 fun DetailsScreen(
     drinkId: Int,
     drinkName: String,
-    drinkPrice: String?,
+    drinkPrice: String,
     viewModel: DetailsViewModel = koinViewModel { parametersOf(drinkId) },
     pop: () -> Unit
 ) {
