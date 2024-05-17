@@ -6,8 +6,4 @@ import kotlinx.serialization.Serializable
 object Catalog
 
 @Serializable
-data class Settings(
-    val id: Int,
-    val name: String,
-    val price: String = ""
-)
+data class Settings(val id: Int)

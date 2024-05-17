@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import ru.ikom.catalog.domain.DrinksRepository
 
@@ -20,9 +21,9 @@ class CatalogViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            repository.fetchDrinks().collect {
-                _uiState.value = CatalogUiState(it.map { it.toDrinkUi() })
-            }
+            repository.fetchDrinks().map { it.map { it.toDrinkUi() } }.collect {
+                    _uiState.value = CatalogUiState(it)
+                }
         }
     }
 }

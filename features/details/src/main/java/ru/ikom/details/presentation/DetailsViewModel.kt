@@ -23,7 +23,13 @@ class DetailsViewModel(
 
     init {
         viewModelScope.launch(dispatcher) {
-            startUiState = DetailsUiState(repository.fetchDrink(drinkId).toDrinkUi())
+            val drink = repository.fetchDrink(drinkId).toDrinkUi()
+            startUiState = DetailsUiState(
+                drink,
+                inputName = drink.name,
+                inputPrice = drink.price?.toString() ?: "",
+                switchIsFree = drink.price == null
+            )
             _uiState.value = startUiState.copy()
         }
     }
@@ -34,6 +40,8 @@ class DetailsViewModel(
             is Event.ChangePrice -> changePrice(event.price)
             is Event.Save -> save(event.name, event.price)
             is Event.SellForFree -> sellForFree(event.isFree)
+            is Event.InputName -> inputName(event.name)
+            is Event.InputPrice -> inputPrice(event.price)
         }
     }
 
@@ -56,14 +64,25 @@ class DetailsViewModel(
     private fun sellForFree(isFree: Boolean) = viewModelScope.launch(dispatcher) {
         if (isFree) changePrice(null)
         else changePrice(startUiState.drink?.price)
+        _uiState.update { it.copy(inputPrice = if (isFree) "" else startUiState.inputPrice, switchIsFree = isFree) }
     }
 
+    private fun inputName(name: String) = viewModelScope.launch(dispatcher) {
+        _uiState.update { it.copy(inputName = name) }
+    }
+
+    private fun inputPrice(price: String) = viewModelScope.launch(dispatcher) {
+        _uiState.update { it.copy(inputPrice = price, switchIsFree = price.isEmpty()) }
+    }
 }
 
 data class DetailsUiState(
     val drink: DrinkUi? = null,
     val isChanges: Boolean = false,
-    val isCompleted: Unit? = null
+    val isCompleted: Unit? = null,
+    val inputName: String = "",
+    val inputPrice: String = "",
+    val switchIsFree: Boolean = false
 )
 
 sealed interface Event {
@@ -75,6 +94,12 @@ sealed interface Event {
 
     @JvmInline
     value class SellForFree(val isFree: Boolean) : Event
+
+    @JvmInline
+    value class InputName(val name: String) : Event
+
+    @JvmInline
+    value class InputPrice(val price: String) : Event
 
     class Save(val name: String, val price: Int?) : Event
 }

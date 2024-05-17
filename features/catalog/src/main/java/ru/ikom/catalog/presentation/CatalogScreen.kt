@@ -43,7 +43,7 @@ import ru.ikom.common.theme.Orange
 @Composable
 fun CatalogScreen(
     viewModel: CatalogViewModel = koinViewModel(),
-    onNavigateToDetails: (Int, String, Int?) -> Unit
+    onNavigateToDetails: (Int) -> Unit
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -53,7 +53,7 @@ fun CatalogScreen(
         ) {
             items(state.drinks, key = { item -> item.id }) {
                 DrinkItem(item = it) {
-                    onNavigateToDetails(it.id, it.name, it.price)
+                    onNavigateToDetails(it.id)
                 }
             }
         }

@@ -47,15 +47,11 @@ import ru.ikom.details.R
 @Composable
 fun DetailsScreen(
     drinkId: Int,
-    drinkName: String,
-    drinkPrice: String,
     viewModel: DetailsViewModel = koinViewModel { parametersOf(drinkId) },
     pop: () -> Unit
 ) {
     val configuration = LocalConfiguration.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
-    var inputName by remember { mutableStateOf(drinkName) }
-    var inputPrice by remember { mutableStateOf(drinkPrice ?: "") }
 
     if (state.isCompleted != null) {
         LaunchedEffect(Unit) {
@@ -66,16 +62,17 @@ fun DetailsScreen(
     when (configuration.orientation) {
         Configuration.ORIENTATION_PORTRAIT ->
             PortraitOrientation(
-                drinkName = inputName,
-                drinkPrice = inputPrice,
+                drinkName = state.inputName,
+                drinkPrice = state.inputPrice,
                 isEnabled = state.isChanges,
+                switchIsFree = state.switchIsFree,
                 onChangeName = {
-                    inputName = it
+                    viewModel.action(Event.InputName(it))
                     viewModel.action(Event.ChangeName(it))
                 },
                 onChangePrice = {
                     if (!it.contains(COMMA) && !it.contains(DOT)) {
-                        inputPrice = it
+                        viewModel.action(Event.InputPrice(it))
                         if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
                         else viewModel.action(Event.ChangePrice(null))
                     }
@@ -85,23 +82,23 @@ fun DetailsScreen(
                     else viewModel.action(Event.Save(name, null))
                 },
                 onSwitch = {
-                    inputPrice = if (it) "" else drinkPrice ?: ""
                     viewModel.action(Event.SellForFree(it))
                 }
             )
 
         else ->
             LandscapeOrientation(
-                drinkName = inputName,
-                drinkPrice = inputPrice,
+                drinkName = state.inputName,
+                drinkPrice = state.inputPrice,
                 isEnabled = state.isChanges,
+                switchIsFree = state.switchIsFree,
                 onChangeName = {
-                    inputName = it
+                    viewModel.action(Event.InputName(it))
                     viewModel.action(Event.ChangeName(it))
                 },
                 onChangePrice = {
                     if (!it.contains(COMMA) && !it.contains(DOT)) {
-                        inputPrice = it
+                        viewModel.action(Event.InputPrice(it))
                         if (it.isNotEmpty()) viewModel.action(Event.ChangePrice(it.toInt()))
                         else viewModel.action(Event.ChangePrice(null))
                     }
@@ -111,7 +108,6 @@ fun DetailsScreen(
                     else viewModel.action(Event.Save(name, null))
                 },
                 onSwitch = {
-                    inputPrice = if (it) "" else drinkPrice ?: ""
                     viewModel.action(Event.SellForFree(it))
                 }
             )
@@ -123,6 +119,7 @@ private fun PortraitOrientation(
     drinkName: String,
     drinkPrice: String,
     isEnabled: Boolean,
+    switchIsFree: Boolean,
     onChangeName: (String) -> Unit,
     onChangePrice: (String) -> Unit,
     onSave: (String, String) -> Unit,
@@ -160,11 +157,9 @@ private fun PortraitOrientation(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(text = stringResource(R.string.sell_for_free), color = Gray)
-            var checked by remember { mutableStateOf(drinkPrice.isEmpty()) }
             Switch(
-                checked = checked,
+                checked = switchIsFree,
                 onCheckedChange = {
-                    checked = it
                     onSwitch(it)
                 },
                 colors = SwitchDefaults.colors(
@@ -193,6 +188,7 @@ private fun LandscapeOrientation(
     drinkName: String,
     drinkPrice: String,
     isEnabled: Boolean,
+    switchIsFree: Boolean,
     onChangeName: (String) -> Unit,
     onChangePrice: (String) -> Unit,
     onSave: (String, String) -> Unit,
@@ -226,11 +222,9 @@ private fun LandscapeOrientation(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(text = stringResource(R.string.sell_for_free), color = Gray)
-                var checked by remember { mutableStateOf(drinkPrice.isEmpty()) }
                 Switch(
-                    checked = checked,
+                    checked = switchIsFree,
                     onCheckedChange = {
-                        checked = it
                         onSwitch(it)
                     },
                     colors = SwitchDefaults.colors(

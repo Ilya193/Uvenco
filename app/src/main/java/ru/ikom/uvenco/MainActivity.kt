@@ -108,14 +108,14 @@ fun Content(viewModel: MainViewModel = koinViewModel()) {
             exitTransition = { slideOutHorizontally(animationSpec = tween(500)) { it } }
         ) {
             composable<Catalog> {
-                CatalogScreen { id, name, price ->
-                    navController.navigate(Settings(id, name, price?.toString() ?: ""))
+                CatalogScreen { id ->
+                    navController.navigate(Settings(id))
                 }
             }
 
             composable<Settings> {
                 val settings: Settings = it.toRoute()
-                DetailsScreen(settings.id, settings.name, settings.price) {
+                DetailsScreen(settings.id) {
                     navController.popBackStack()
                 }
             }
