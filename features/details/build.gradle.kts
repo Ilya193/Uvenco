@@ -46,4 +46,7 @@ dependencies {
 
     implementation(libs.koin)
     implementation(libs.lifecycle.runtime.compose)
+    testImplementation(libs.junit)
+    testImplementation(libs.mockito.core)
+    testImplementation(libs.kotlinx.coroutines.test)
 }
