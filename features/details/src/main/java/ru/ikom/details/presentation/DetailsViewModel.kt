@@ -42,6 +42,7 @@ class DetailsViewModel(
             is Event.SellForFree -> sellForFree(event.isFree)
             is Event.InputName -> inputName(event.name)
             is Event.InputPrice -> inputPrice(event.price)
+            is Event.Reset -> reset()
         }
     }
 
@@ -57,7 +58,7 @@ class DetailsViewModel(
     private fun save(name: String, price: Int?) = viewModelScope.launch(dispatcher) {
         startUiState.drink?.let { drink ->
             repository.updateDrink(drink.copy(name = name, price = price).toDrinkDomain())
-            _uiState.update { it.copy(isCompleted = Unit) }
+            _uiState.update { it.copy(isCompleted = true) }
         }
     }
 
@@ -74,12 +75,16 @@ class DetailsViewModel(
     private fun inputPrice(price: String) = viewModelScope.launch(dispatcher) {
         _uiState.update { it.copy(inputPrice = price, switchIsFree = price.isEmpty()) }
     }
+
+    fun reset() {
+        _uiState.update { it.copy(isCompleted = false) }
+    }
 }
 
 data class DetailsUiState(
     val drink: DrinkUi? = null,
     val isChanges: Boolean = false,
-    val isCompleted: Unit? = null,
+    val isCompleted: Boolean = false,
     val inputName: String = "",
     val inputPrice: String = "",
     val switchIsFree: Boolean = false
@@ -102,4 +107,6 @@ sealed interface Event {
     value class InputPrice(val price: String) : Event
 
     class Save(val name: String, val price: Int?) : Event
+
+    class Reset : Event
 }

@@ -69,9 +69,6 @@ dependencies {
     implementation(libs.koin)
 
     implementation(libs.room.runtime)
-    annotationProcessor(libs.room.compiler)
-    ksp(libs.room.compiler)
-    implementation(libs.room.ktx)
 
     implementation(libs.kotlinx.serialization.json)
 }

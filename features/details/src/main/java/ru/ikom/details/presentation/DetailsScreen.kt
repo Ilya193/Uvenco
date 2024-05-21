@@ -53,10 +53,8 @@ fun DetailsScreen(
     val configuration = LocalConfiguration.current
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (state.isCompleted != null) {
-        LaunchedEffect(Unit) {
-            pop()
-        }
+    LaunchedEffect(state.isCompleted) {
+        if (state.isCompleted) pop()
     }
 
     when (configuration.orientation) {
