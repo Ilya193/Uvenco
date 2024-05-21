@@ -43,8 +43,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import org.koin.androidx.compose.koinViewModel
 import ru.ikom.catalog.presentation.CatalogScreen
 import ru.ikom.common.theme.Gray
